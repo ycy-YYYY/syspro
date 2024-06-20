@@ -359,21 +359,32 @@ void SendMsgHandler(struct Msg *msg) {
 
 void initFIFO() {
   // create FIFOs
-  if (mkfifo(reg_fifo, 0666) == -1) {
-    perror("Error creating REG_FIFO");
-    exit(1);
+  if (access(reg_fifo, F_OK) == -1) {
+    if (mkfifo(reg_fifo, 0666) == -1) {
+      perror("Error creating REG_FIFO");
+      exit(1);
+    }
   }
-  if (mkfifo(login_fifo, 0666) == -1) {
-    perror("Error creating LOGIN_FIFO");
-    exit(1);
+
+  if (access(login_fifo, F_OK) == -1) {
+    if (mkfifo(login_fifo, 0666) == -1) {
+      perror("Error creating LOGIN_FIFO");
+      exit(1);
+    }
   }
-  if (mkfifo(msg_fifo, 0666) == -1) {
-    perror("Error creating MSG_FIFO");
-    exit(1);
+
+  if (access(msg_fifo, F_OK) == -1) {
+    if (mkfifo(msg_fifo, 0666) == -1) {
+      perror("Error creating MSG_FIFO");
+      exit(1);
+    }
   }
-  if (mkfifo(logout_fifo, 0666) == -1) {
-    perror("Error creating LOGOUT_FIFO");
-    exit(1);
+
+  if (access(logout_fifo, F_OK) == -1) {
+    if (mkfifo(logout_fifo, 0666) == -1) {
+      perror("Error creating LOGOUT_FIFO");
+      exit(1);
+    }
   }
 
   // open FIFOs for reading
@@ -444,6 +455,7 @@ void initFIFO() {
 }
 
 void destructer() {
+  LOG("Server exit\n");
   close(RegFifoFd);
   close(LoginFifoFd);
   close(MsgFifoFd);
@@ -551,6 +563,7 @@ int main() {
   initFIFO();
   // set signal handler
   signal(SIGTERM, sigHandler);
+  daemon(1, 0);
   startListening();
   destructer();
   return 0;
