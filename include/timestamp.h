@@ -1,0 +1,1 @@
+extern void getTimeStamp(char *buf, int len);
