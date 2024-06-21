@@ -251,20 +251,44 @@ void reTryMessageFromUserFailLog(UserInfo *user) {
   user->fail_log_file = fopen(user->fail_log_file_name, "a+");
 }
 
+void sendBackErrorMsg(struct Msg *msg) {
+  char *user_fifo_name = msg->fifo_name;
+  if (user_fifo_name == NULL) {
+    return;
+  }
+  int fifo_fd = open(user_fifo_name, O_WRONLY | O_NONBLOCK);
+  if (fifo_fd == -1) {
+    return;
+  }
+  ReplyMsg reply_msg;
+  memset(&reply_msg, 0, sizeof(reply_msg));
+  INIT_MSG_HEADER(reply_msg, Reply, serverName, "", "");
+  strcpy(reply_msg.msg, "Failed");
+  int nbytes = write(fifo_fd, &reply_msg, sizeof(reply_msg));
+  if (nbytes == -1) {
+    close(fifo_fd);
+    return;
+  }
+  close(fifo_fd);
+}
+
 void LoginHandler(struct Msg *msg) {
   LoginMsg *login_msg = (LoginMsg *)msg;
   UserInfo *user = FindUser(login_msg->msg_header.username);
 
   if (user == NULL) {
     LOG("User %s not exists\n", login_msg->msg_header.username);
+    sendBackErrorMsg(msg);
     return;
   }
   if (strcmp(user->password, login_msg->msg_header.password) != 0) {
     LOG("User %s login failed\n", login_msg->msg_header.username);
+    sendBackErrorMsg(msg);
     return;
   }
   if (user->is_online) {
     LOG("User %s already online\n", login_msg->msg_header.username);
+    sendBackErrorMsg(msg);
     return;
   }
 
