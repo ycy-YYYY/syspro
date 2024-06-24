@@ -588,7 +588,7 @@ int main() {
   initFIFO();
   // set signal handler
   signal(SIGTERM, sigHandler);
-  daemon(1, 0);
+  // daemon(1, 0);
   startListening();
   destructer();
   return 0;

@@ -144,6 +144,7 @@ void handle_input(char *buf) {
       return;
     }
     char users[USER_NAME_LEN][USER_NAME_LEN];
+    char *msg_buf = NULL;
     int user_count = 0;
     while (1) {
       char *user = strtok(NULL, " ");
@@ -152,6 +153,7 @@ void handle_input(char *buf) {
         return;
       }
       if (strcmp(user, "-m") == 0) {
+        msg_buf = user + 3;
         break;
       }
       strcpy(users[user_count++], user);
@@ -160,8 +162,7 @@ void handle_input(char *buf) {
       printf("Invalid command\n");
       return;
     }
-    // extract message
-    char *msg_buf = strtok(NULL, " ");
+    // extract message after -m
     if (msg_buf == NULL) {
       printf("Invalid command\n");
       return;
