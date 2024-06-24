@@ -316,6 +316,7 @@ void LogOutHandler(struct Msg *msg) {
   LOG_FILE(user->log_file, "User %s logout success\n",
            logout_msg->msg_header.username);
   // send logout success message to user TODO:
+  InfoAllUserStatus();
 }
 
 void saveMessageToUserFailLog(UserInfo *from_user, UserInfo *target_user,
