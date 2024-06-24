@@ -174,6 +174,7 @@ void handle_input(char *buf) {
 
     for (int i = 0; i < user_count; i++) {
       SendMsg msg;
+      memset(&msg, 0, sizeof(msg));
       INIT_MSG_HEADER(msg, SEND, username, password, fifo_name);
       strcpy(msg.target_user, users[i]);
       strcpy(msg.msg, msg_buf);
