@@ -33,3 +33,7 @@ set(CLIENT_FILES
         
 add_executable(server ${SERVER_FILES})
 add_executable(client ${CLIENT_FILES})
+
+TARGET_LINK_LIBRARIES(server
+pthread
+)
