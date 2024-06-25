@@ -1,3 +1,4 @@
+#pragma once
 #define USER_NAME_LEN 64
 #define PASSWORD_LEN 64
 #define USER_FIFO_NAME_LEN 128

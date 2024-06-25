@@ -9,6 +9,9 @@ void list_add(ListNode *new, ListNode *head) {
   next->prev = new;
 }
 
+// 判断链表是否为空
+int list_empty(ListNode *head) { return head->next == head; }
+
 // 从链表中删除节点
 void list_del(ListNode *entry) {
   ListNode *prev = entry->prev;

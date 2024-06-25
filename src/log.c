@@ -1,12 +1,23 @@
 #include "log.h"
 #include <stdlib.h>
 FILE *server_log;
+FILE *thread_pool_log;
 
 void init_server_log(const char *log_file) {
   // open log file, create if not exists
   server_log = fopen(log_file, "a");
   // LOG("Server log file opened\n");
   if (server_log == NULL) {
+    perror("Error opening log file");
+    exit(1);
+  }
+}
+
+void init_thread_pool_log(const char *log_file) {
+  // open log file, create if not exists
+  thread_pool_log = fopen(log_file, "a");
+  // LOG("Thread pool log file opened\n");
+  if (thread_pool_log == NULL) {
     perror("Error opening log file");
     exit(1);
   }

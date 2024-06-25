@@ -1,3 +1,4 @@
+#pragma once
 /** log.h **/
 // define logging macros
 
@@ -26,7 +27,11 @@
             ##__VA_ARGS__);                                                    \
     fflush(file);                                                              \
   } while (0)
+  
+// log with thread pool log file
+#define LOG_TP(fmt, ...) LOG_FILE(thread_pool_log, fmt, ##__VA_ARGS__)
 
 extern FILE *server_log;
-
-void init_server_log(const char *log_file);
+extern FILE *thread_pool_log;
+extern void init_server_log(const char *log_file);
+extern void init_thread_pool_log(const char *log_file);

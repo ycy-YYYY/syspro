@@ -1,3 +1,4 @@
+#pragma once
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -27,6 +28,9 @@ void list_add(ListNode *new, ListNode *head);
 
 // 从链表中删除节点
 void list_del(ListNode *entry);
+
+// 判断链表是否为空
+int list_empty(ListNode *head);
 
 // 获取用户数据结构的指针
 #define list_entry(ptr, type, member)                                          \

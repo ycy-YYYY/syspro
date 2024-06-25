@@ -15,6 +15,7 @@
 #include <sys/time.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include "thread_pool.h"
 
 #define SERVER_NAME_LEN 32
 #define VERSION_LEN 32
@@ -200,6 +201,8 @@ static void initConfig()
       assert(strlen(server_log_dir) + strlen("server.log") < LOG_NAME_LEN);
       strcpy(server_log_file, server_log_dir);
       strcat(server_log_file, "server.log");
+      strcpy(thread_pool_log_file, server_log_dir);
+      strcat(thread_pool_log_file, "threads.log");
     }
     else if (strcmp(key, "LOGFILES_USERS") == 0)
     {
@@ -213,6 +216,10 @@ static void initConfig()
     {
       strcpy(version, value);
     }
+    else if (strcmp(key, "THREAD_POOL_SIZE") == 0)
+    {
+      config_thread_pool_size = atoi(value);
+    }
   }
   fclose(fp);
 }
@@ -220,6 +227,7 @@ static void initConfig()
 void initLogger()
 {
   init_server_log(server_log_file);
+  init_thread_pool_log(thread_pool_log_file);
   assert(server_log_file != NULL);
 }
 
@@ -596,6 +604,10 @@ void destructer()
     close(user->msg_fifo_fd);
     free(user);
   }
+
+  // destroy thread pool
+  thread_pool_destroy();
+  fclose(thread_pool_log);
 }
 
 void initUserList()
@@ -637,9 +649,10 @@ void startListening()
         exit(1);
       }
       // create new thread to handle message
-      pthread_t tid;
-      pthread_create(&tid, NULL, (void *)RegistHandler, (void *)msg);
-      pthread_detach(tid);
+      // pthread_t tid;
+      // pthread_create(&tid, NULL, (void *)RegistHandler, (void *)msg);
+      // pthread_detach(tid);
+      thread_pool_add_task((void *(*)(void *))RegistHandler, (void *)msg);
     }
     if (FD_ISSET(LoginFifoFd, &tmp_fds))
     {
@@ -651,9 +664,10 @@ void startListening()
         perror("Error reading from LOGIN_FIFO");
         exit(1);
       }
-      pthread_t tid;
-      pthread_create(&tid, NULL, (void *)LoginHandler, (void *)msg);
-      pthread_detach(tid);
+      // pthread_t tid;
+      // pthread_create(&tid, NULL, (void *)LoginHandler, (void *)msg);
+      // pthread_detach(tid);
+      thread_pool_add_task((void *(*)(void *))LoginHandler, (void *)msg);
     }
     if (FD_ISSET(MsgFifoFd, &tmp_fds))
     {
@@ -665,9 +679,10 @@ void startListening()
         perror("Error reading from MSG_FIFO");
         exit(1);
       }
-      pthread_t tid;
-      pthread_create(&tid, NULL, (void *)SendMsgHandler, (void *)msg);
-      pthread_detach(tid);
+      // pthread_t tid;
+      // pthread_create(&tid, NULL, (void *)SendMsgHandler, (void *)msg);
+      // pthread_detach(tid);
+      thread_pool_add_task((void *(*)(void *))SendMsgHandler, (void *)msg);
     }
     if (FD_ISSET(LogoutFifoFd, &tmp_fds))
     {
@@ -679,11 +694,17 @@ void startListening()
         perror("Error reading from LOGOUT_FIFO");
         exit(1);
       }
-      pthread_t tid;
-      pthread_create(&tid, NULL, (void *)LogOutHandler, (void *)msg);
-      pthread_detach(tid);
+      // pthread_t tid;
+      // pthread_create(&tid, NULL, (void *)LogOutHandler, (void *)msg);
+      // pthread_detach(tid);
+      thread_pool_add_task((void *(*)(void *))LogOutHandler, (void *)msg);
     }
   }
+}
+
+void initThreadPool()
+{
+  thread_pool_init(config_thread_pool_size);
 }
 
 void sigHandler()
@@ -702,7 +723,8 @@ int main()
   // set signal handler
   signal(SIGTERM, sigHandler);
   // daemon(1, 0);
+  initThreadPool();
   startListening();
-  destructer();
+  // destructer();
   return 0;
 }

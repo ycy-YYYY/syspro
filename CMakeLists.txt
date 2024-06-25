@@ -25,6 +25,7 @@ set(SERVER_FILES
         src/log.c
         src/list.c
         src/timestamp.c
+        src/thread_pool.c
         )
         
 set(CLIENT_FILES
